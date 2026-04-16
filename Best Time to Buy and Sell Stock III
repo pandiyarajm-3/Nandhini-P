@@ -1,0 +1,29 @@
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+using namespace std;
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        if (prices.empty()) return 0;
+
+        // buy1 and buy2 represent costs, so we want to minimize them (maximize -price)
+        int buy1 = INT_MIN, buy2 = INT_MIN;
+        int sell1 = 0, sell2 = 0;
+
+        for (int p : prices) {
+            // 1. Max profit after first buy (negative cost)
+            buy1 = max(buy1, -p);
+            // 2. Max profit after first sell
+            sell1 = max(sell1, buy1 + p);
+            // 3. Max profit after second buy (reinvesting sell1 profit)
+            buy2 = max(buy2, sell1 - p);
+            // 4. Max total profit after second sell
+            sell2 = max(sell2, buy2 + p);
+        }
+
+        return sell2;
+    }
+};
