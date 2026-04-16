@@ -1,0 +1,48 @@
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
+class Solution {
+public:
+    long long minimumTotalDistance(vector<int>& robot, vector<vector<int>>& factory) {
+        sort(robot.begin(), robot.end());
+        sort(factory.begin(), factory.end());
+
+        // Flatten factories into individual slots
+        vector<int> slots;
+        for (auto& f : factory) {
+            for (int i = 0; i < f[1]; ++i) {
+                slots.push_back(f[0]);
+            }
+        }
+
+        int n = robot.size();
+        int m = slots.size();
+
+        // dp[j] will store the min distance for i robots using j slots
+        // Initialize with a large value (1e15 is safe given constraints)
+        vector<long long> dp(m + 1, 0);
+        
+        // Base case: 0 robots fixed takes 0 distance.
+        // If we have i robots and 0 slots, it's impossible (handled by initialization)
+        vector<long long> prev(m + 1, 0);
+
+        for (int i = 1; i <= n; ++i) {
+            vector<long long> curr(m + 1, 1e15); 
+            for (int j = 1; j <= m; ++j) {
+                // Option 1: Don't use the j-th slot for any robot
+                curr[j] = curr[j - 1];
+                
+                // Option 2: Use the j-th slot for the i-th robot
+                // Only possible if the (i-1) robots were fixed by (j-1) slots
+                long long take = prev[j - 1] + abs(robot[i - 1] - slots[j - 1]);
+                curr[j] = min(curr[j], take);
+            }
+            prev = curr;
+        }
+
+        return prev[m];
+    }
+};
