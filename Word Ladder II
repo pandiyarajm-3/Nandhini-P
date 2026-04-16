@@ -1,0 +1,81 @@
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+    unordered_map<string, int> distances;
+    vector<vector<string>> results;
+    string start;
+
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> dict(wordList.begin(), wordList.end());
+        if (dict.find(endWord) == dict.end()) return {};
+
+        start = beginWord;
+        queue<string> q;
+        q.push(beginWord);
+        distances[beginWord] = 0;
+
+        // Phase 1: BFS to find the shortest distance to each reachable word
+        while (!q.empty()) {
+            string word = q.front();
+            q.pop();
+
+            if (word == endWord) break;
+
+            string temp = word;
+            for (int i = 0; i < temp.size(); i++) {
+                char original = temp[i];
+                for (char c = 'a'; c <= 'z'; c++) {
+                    temp[i] = c;
+                    if (dict.count(temp) && distances.find(temp) == distances.end()) {
+                        distances[temp] = distances[word] + 1;
+                        q.push(temp);
+                    }
+                }
+                temp[i] = original;
+            }
+        }
+
+        // Phase 2: If endWord was reached, backtrack to find all paths
+        if (distances.count(endWord)) {
+            vector<string> path = {endWord};
+            backtrack(endWord, path);
+        }
+
+        return results;
+    }
+
+private:
+    void backtrack(string currentWord, vector<string>& path) {
+        if (currentWord == start) {
+            vector<string> foundPath = path;
+            reverse(foundPath.begin(), foundPath.end());
+            results.push_back(foundPath);
+            return;
+        }
+
+        int targetDist = distances[currentWord] - 1;
+        string temp = currentWord;
+
+        for (int i = 0; i < temp.size(); i++) {
+            char original = temp[i];
+            for (char c = 'a'; c <= 'z'; c++) {
+                temp[i] = c;
+                // Only move to words that are exactly one level closer to the start
+                if (distances.count(temp) && distances[temp] == targetDist) {
+                    path.push_back(temp);
+                    backtrack(temp, path);
+                    path.pop_back(); // Clean up for next branch
+                }
+            }
+            temp[i] = original;
+        }
+    }
+};
