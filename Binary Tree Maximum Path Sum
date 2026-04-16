@@ -1,0 +1,39 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int maxPathSum(TreeNode* root) {
+        int globalMax = INT_MIN;
+        calculateSum(root, globalMax);
+        return globalMax;
+    }
+
+private:
+    int calculateSum(TreeNode* node, int& globalMax) {
+        if (!node) return 0;
+
+        // Recursively get the max gain from left and right subtrees.
+        // If a child returns a negative sum, we ignore it (take 0).
+        int leftGain = max(calculateSum(node->left, globalMax), 0);
+        int rightGain = max(calculateSum(node->right, globalMax), 0);
+
+        // Price of a new path with the current node as the highest "peak"
+        int currentPathSum = node->val + leftGain + rightGain;
+
+        // Update the global maximum if the current path is better
+        globalMax = max(globalMax, currentPathSum);
+
+        // For the parent call, return the max path starting from this node 
+        // and moving down into one of its subtrees.
+        return node->val + max(leftGain, rightGain);
+    }
+};
