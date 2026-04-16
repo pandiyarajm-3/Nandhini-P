@@ -1,0 +1,44 @@
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+class Solution {
+    unordered_map<string, vector<string>> memo;
+
+public:
+    vector<string> wordBreak(string s, vector<string>& wordDict) {
+        unordered_set<string> dict(wordDict.begin(), wordDict.end());
+        return dfs(s, dict);
+    }
+
+private:
+    vector<string> dfs(string s, unordered_set<string>& dict) {
+        // If we've already computed the result for this suffix, return it
+        if (memo.count(s)) return memo[s];
+        
+        // Base case: empty string returns a list with an empty entry to allow joining
+        if (s.empty()) return {""};
+
+        vector<string> result;
+
+        // Try every possible split point
+        for (int i = 1; i <= s.length(); ++i) {
+            string word = s.substr(0, i);
+            
+            if (dict.count(word)) {
+                string suffix = s.substr(i);
+                vector<string> suffixWays = dfs(suffix, dict);
+                
+                for (const string& way : suffixWays) {
+                    string space = way.empty() ? "" : " ";
+                    result.push_back(word + space + way);
+                }
+            }
+        }
+
+        return memo[s] = result;
+    }
+};
